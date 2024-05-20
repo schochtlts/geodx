@@ -8,7 +8,7 @@
 #include "../engine/noise.hpp"
 #include "../engine/3d.hpp"
 
-void controls(Object* obj) {
+void controls(Camera* cam) {
   SDL_Event event;
 
   while(SDL_PollEvent(&event))
@@ -16,9 +16,66 @@ void controls(Object* obj) {
     switch(event.type) {
       case SDL_KEYDOWN:
         switch(event.key.keysym.sym) {
-          case SDLK_RIGHT:
-            rotate_object(obj, 0.2f); 
+          case SDLK_z: {
+            Vec3 axis = transform_normal(cam->transform, { 1, 0, 0 });
+
+            double x_rot[3][4];
+            axis_angle_to_transform(x_rot, axis, 0.02f);
+
+            transform_mul(cam->transform, x_rot, cam->transform);
+            
             break;
+          }
+          case SDLK_s: {
+            Vec3 axis = transform_normal(cam->transform, { 1, 0, 0 });
+
+            double x_rot[3][4];
+            axis_angle_to_transform(x_rot, axis, -0.02f);
+
+            transform_mul(cam->transform, x_rot, cam->transform);
+            
+            break;
+          }
+          case SDLK_d: {
+            Vec3 axis = transform_normal(cam->transform, { 0, 1, 0 });
+
+            double y_rot[3][4];
+            axis_angle_to_transform(y_rot, axis, -0.02f);
+
+            transform_mul(cam->transform, y_rot, cam->transform);
+            
+            break;
+          }
+          case SDLK_q: {
+            Vec3 axis = transform_normal(cam->transform, { 0, 1, 0 });
+
+            double y_rot[3][4];
+            axis_angle_to_transform(y_rot, axis, 0.02f);
+
+            transform_mul(cam->transform, y_rot, cam->transform);
+            
+            break;
+          }
+          case SDLK_e: {
+            Vec3 axis = transform_normal(cam->transform, { 0, 0, 1 });
+
+            double z_rot[3][4];
+            axis_angle_to_transform(z_rot, axis, -0.02f);
+
+            transform_mul(cam->transform, z_rot, cam->transform);
+            
+            break;
+          }
+          case SDLK_a: {
+            Vec3 axis = transform_normal(cam->transform, { 0, 0, 1 });
+
+            double z_rot[3][4];
+            axis_angle_to_transform(z_rot, axis, 0.02f);
+
+            transform_mul(cam->transform, z_rot, cam->transform);
+
+            break;
+          }
           default:
             break;
         }
@@ -67,20 +124,20 @@ typedef struct {
 MainLoopArgs;
 
 void game_setup(MainLoopArgs* a) {
-  static Mesh ico = generate_icosphere(200, 4);
+  static Mesh ico = generate_icosphere(500, 4);
   compute_normals(&ico);
   color_mesh(&ico);
 
   static Object planet = { IDENT_TRANSFORM, &ico };
   static Camera cam = { IDENT_TRANSFORM, 0.87f };
-  cam.transform[2][3] = -1000;
+  cam.transform[2][3] = -2000;
 
   a->cam = &cam;
   a->planet = &planet;
 }
 
 void game_update(MainLoopArgs* a) {
-  controls(a->planet);
+  controls(a->cam);
   draw_object(a->renderer, a->cam, a->planet, a->window_width, a->window_height);
 }
 

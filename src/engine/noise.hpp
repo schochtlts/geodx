@@ -10,7 +10,7 @@
 // Thanks Thomas Wang for this beautiful function, it works very well
 // https://burtleburtle.net/bob/hash/integer.html
 double hash(Vec3 pos, uint32_t seed) {
-    uint32_t a = ((uint32_t)pos.z << 24) + ((uint32_t)pos.y << 16) + ((uint32_t)pos.x << 8) + seed;
+    uint32_t a = ((uint32_t)std::abs(pos.z) << 24) + ((uint32_t)std::abs(pos.y) << 16) + ((uint32_t)std::abs(pos.x) << 8) + seed;
     
     a -= a << 6;
     a ^= a >> 17;

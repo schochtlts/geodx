@@ -110,15 +110,15 @@ void compute_normals(Mesh* mesh) {
     const Triangle t = mesh->triangles[i];
     
     const Vec3 v1 = {
-      t.verts[1].pos.x - t.verts[0].pos.x,
-      t.verts[1].pos.y - t.verts[0].pos.y,
-      t.verts[1].pos.z - t.verts[0].pos.z
-    };
-
-    const Vec3 v2 = {
       t.verts[2].pos.x - t.verts[0].pos.x,
       t.verts[2].pos.y - t.verts[0].pos.y,
       t.verts[2].pos.z - t.verts[0].pos.z
+    };
+
+    const Vec3 v2 = {
+      t.verts[1].pos.x - t.verts[0].pos.x,
+      t.verts[1].pos.y - t.verts[0].pos.y,
+      t.verts[1].pos.z - t.verts[0].pos.z
     };
 
     Vec3 n = {
@@ -173,21 +173,59 @@ void rotate_mesh(Mesh* mesh, double angle, uint8_t axis) {
   }
 }
 
+void scalar_transform_mul(double dest[3][4], double scalar, double m[3][4]) {
+  dest[0][0] = scalar * m[0][0];
+  dest[0][1] = scalar * m[0][1];
+  dest[0][2] = scalar * m[0][2];
+  dest[0][3] = scalar * m[0][3];
+
+  dest[1][0] = scalar * m[1][0];
+  dest[1][1] = scalar * m[1][1];
+  dest[1][2] = scalar * m[1][2];
+  dest[1][3] = scalar * m[1][3];
+
+  dest[2][0] = scalar * m[2][0];
+  dest[2][1] = scalar * m[2][1];
+  dest[2][2] = scalar * m[2][2];
+  dest[2][3] = scalar * m[2][3];
+}
+
+void transform_add(double dest[3][4], double m1[3][4], double m2[3][4]) {
+  dest[0][0] = m1[0][0] + m2[0][0];
+  dest[0][1] = m1[0][1] + m2[0][1];
+  dest[0][2] = m1[0][2] + m2[0][2];
+  dest[0][3] = m1[0][3] + m2[0][3];
+
+  dest[1][0] = m1[1][0] + m2[1][0];
+  dest[1][1] = m1[1][1] + m2[1][1];
+  dest[1][2] = m1[1][2] + m2[1][2];
+  dest[1][3] = m1[1][3] + m2[1][3];
+
+  dest[2][0] = m1[2][0] + m2[2][0];
+  dest[2][1] = m1[2][1] + m2[2][1];
+  dest[2][2] = m1[2][2] + m2[2][2];
+  dest[2][3] = m1[2][3] + m2[2][3];
+}
+
 void transform_mul(double dest[3][4], double m1[3][4], double m2[3][4]) {
-  dest[0][0] = m1[0][0]*m2[0][0] + m1[0][1]*m2[1][0] + m1[0][2]*m2[2][0];
-  dest[0][1] = m1[0][0]*m2[0][1] + m1[0][1]*m2[1][1] + m1[0][2]*m2[2][1];
-  dest[0][2] = m1[0][0]*m2[0][2] + m1[0][1]*m2[1][2] + m1[0][2]*m2[2][2];
-  dest[0][3] = m1[0][0]*m2[0][3] + m1[0][1]*m2[1][3] + m1[0][2]*m2[2][3] + m1[0][3];
+  double temp[3][4];
 
-  dest[1][0] = m1[1][0]*m2[0][0] + m1[1][1]*m2[1][0] + m1[1][2]*m2[2][0];
-  dest[1][1] = m1[1][0]*m2[0][1] + m1[1][1]*m2[1][1] + m1[1][2]*m2[2][1];
-  dest[1][2] = m1[1][0]*m2[0][2] + m1[1][1]*m2[1][2] + m1[1][2]*m2[2][2];
-  dest[1][3] = m1[1][0]*m2[0][3] + m1[1][1]*m2[1][3] + m1[1][2]*m2[2][3] + m1[1][3];
+  temp[0][0] = m1[0][0]*m2[0][0] + m1[0][1]*m2[1][0] + m1[0][2]*m2[2][0];
+  temp[0][1] = m1[0][0]*m2[0][1] + m1[0][1]*m2[1][1] + m1[0][2]*m2[2][1];
+  temp[0][2] = m1[0][0]*m2[0][2] + m1[0][1]*m2[1][2] + m1[0][2]*m2[2][2];
+  temp[0][3] = m1[0][0]*m2[0][3] + m1[0][1]*m2[1][3] + m1[0][2]*m2[2][3] + m1[0][3];
 
-  dest[2][0] = m1[2][0]*m2[0][0] + m1[2][1]*m2[1][0] + m1[2][2]*m2[2][0];
-  dest[2][1] = m1[2][0]*m2[0][1] + m1[2][1]*m2[1][1] + m1[2][2]*m2[2][1];
-  dest[2][2] = m1[2][0]*m2[0][2] + m1[2][1]*m2[1][2] + m1[2][2]*m2[2][2];
-  dest[2][3] = m1[2][0]*m2[0][3] + m1[2][1]*m2[1][3] + m1[2][2]*m2[2][3] + m1[2][3];
+  temp[1][0] = m1[1][0]*m2[0][0] + m1[1][1]*m2[1][0] + m1[1][2]*m2[2][0];
+  temp[1][1] = m1[1][0]*m2[0][1] + m1[1][1]*m2[1][1] + m1[1][2]*m2[2][1];
+  temp[1][2] = m1[1][0]*m2[0][2] + m1[1][1]*m2[1][2] + m1[1][2]*m2[2][2];
+  temp[1][3] = m1[1][0]*m2[0][3] + m1[1][1]*m2[1][3] + m1[1][2]*m2[2][3] + m1[1][3];
+
+  temp[2][0] = m1[2][0]*m2[0][0] + m1[2][1]*m2[1][0] + m1[2][2]*m2[2][0];
+  temp[2][1] = m1[2][0]*m2[0][1] + m1[2][1]*m2[1][1] + m1[2][2]*m2[2][1];
+  temp[2][2] = m1[2][0]*m2[0][2] + m1[2][1]*m2[1][2] + m1[2][2]*m2[2][2];
+  temp[2][3] = m1[2][0]*m2[0][3] + m1[2][1]*m2[1][3] + m1[2][2]*m2[2][3] + m1[2][3];
+
+  memcpy(dest, temp, 12*sizeof(double));
 }
 
 Vec3 transform_vec(double m[3][4], Vec3 v) {
@@ -212,23 +250,26 @@ void draw_object(SDL_Renderer* renderer, Camera* cam, Object* obj, double win_wi
   const double D = HF_W / std::tan(cam->fov / 2);
 
   const auto m = cam->transform;
-  double cam_inv[3][4] = { { m[0][0], m[1][0], m[2][0], -m[0][3] },
-                           { m[0][1], m[1][1], m[2][1], -m[1][3] },
-                           { m[0][2], m[1][2], m[2][2], -m[2][3] } };
+  double view_mat[3][4] = { { m[0][0], m[1][0], m[2][0], -(m[0][0]*m[0][3] + m[1][0]*m[1][3] + m[2][0]*m[2][3]) },
+                            { m[0][1], m[1][1], m[2][1], -(m[0][1]*m[0][3] + m[1][1]*m[1][3] + m[2][1]*m[2][3]) },
+                            { m[0][2], m[1][2], m[2][2], -(m[0][2]*m[0][3] + m[1][2]*m[1][3] + m[2][2]*m[2][3]) } };
 
   double to_cam_space[3][4];
-  transform_mul(to_cam_space, cam_inv, obj->transform);
+  transform_mul(to_cam_space, view_mat, obj->transform);
 
   for(size_t i = 0; i < obj->mesh->triangles.size(); i++) {
     const Triangle t = obj->mesh->triangles[i];
     
     const Vec3 n = transform_normal(to_cam_space, t.normal);
     const Vec3 p0 = transform_vec(to_cam_space, t.verts[0].pos);
+    //if(p0.z < 0) continue;
 
-    if(p0.x*n.x + p0.y*n.y + p0.z*n.z > 0) continue;
+    if(p0.x*n.x + p0.y*n.y + p0.z*n.z > 0) continue;    
 
     const Vec3 p1 = transform_vec(to_cam_space, t.verts[1].pos);
+    //if(p1.z < 0) continue;
     const Vec3 p2 = transform_vec(to_cam_space, t.verts[2].pos);
+    //if(p2.z < 0) continue;
 
     const double Z0 = D / (D + p0.z);
     const double Z1 = D / (D + p1.z);
@@ -244,15 +285,22 @@ void draw_object(SDL_Renderer* renderer, Camera* cam, Object* obj, double win_wi
   }
 }
 
-void rotate_object(Object* obj, double angle) {
-  const double cos = std::cos(angle), sin = std::sin(angle);
-  double rot_mat[3][4] = { { 1, 0,   0,    0 },
-                           { 0, cos, -sin, 0 },
-                           { 0, sin, cos,  0 } };
+void axis_angle_to_transform(double rot_mat[3][4], Vec3 axis, double angle) {
+  double K[3][4] = { { 0.0f, -axis.z, axis.y, 0.0f },
+                     { axis.z, 0.0f, -axis.x, 0.0f },
+                     { -axis.y, axis.x, 0.0f, 0.0f } };
 
-  double temp[3][4];
-  transform_mul(temp, rot_mat, obj->transform);
-  memcpy(obj->transform, temp, 12*sizeof(double));
+  double K_sq[3][4];
+  transform_mul(K_sq, K, K);
+
+  scalar_transform_mul(K, std::sin(angle), K);
+  scalar_transform_mul(K_sq, 1.0f - std::cos(angle), K_sq);
+
+  double R[3][4] = IDENT_TRANSFORM;
+  transform_add(R, R, K);
+  transform_add(R, R, K_sq);
+
+  memcpy(rot_mat, R, 12*sizeof(double));
 }
 
 #endif
