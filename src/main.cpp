@@ -16,14 +16,14 @@ void loop(void* args) {
   SDL_RenderPresent(a->renderer);
 }
 
-int32_t main() {
-  SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+int main(int argc, char* args[]) {
+  SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS);
 
-  SDL_Window* window;
-  SDL_Renderer* renderer;
+  SDL_Window* window=NULL;
+  SDL_Renderer* renderer=NULL;
 
-  int32_t window_width = EM_ASM_INT(return window.innerWidth);
-  int32_t window_height = EM_ASM_INT(return window.innerHeight);
+  int window_width=EM_ASM_INT(return window.innerWidth);
+  int window_height=EM_ASM_INT(return window.innerHeight);
   
   SDL_CreateWindowAndRenderer(window_width, window_height, 0, &window, &renderer);
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);

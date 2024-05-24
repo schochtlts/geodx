@@ -16,66 +16,24 @@ void controls(Camera* cam) {
     switch(event.type) {
       case SDL_KEYDOWN:
         switch(event.key.keysym.sym) {
-          case SDLK_z: {
-            Vec3 axis = transform_normal(cam->transform, { 1, 0, 0 });
 
-            double x_rot[3][4];
-            axis_angle_to_transform(x_rot, axis, 0.02f);
+#define controls_KEYDOWN_case_vec1 {1,0,0}
+#define controls_KEYDOWN_case_vec2 {0,1,0}
+#define controls_KEYDOWN_case_vec3 {0,0,1}
 
-            transform_mul(cam->transform, x_rot, cam->transform);
-            
-            break;
-          }
-          case SDLK_s: {
-            Vec3 axis = transform_normal(cam->transform, { 1, 0, 0 });
+#define controls_KEYDOWN_case(key, vec, angle) case key:\
+  Vec3 axis = transform_normal(cam->transform, vec);\
+  double rot[3][4];\
+  axis_angle_to_transform(rot, axis, angle);\
+  transform_mul(cam->transform, rot, cam->transform);\
+  break;
 
-            double x_rot[3][4];
-            axis_angle_to_transform(x_rot, axis, -0.02f);
-
-            transform_mul(cam->transform, x_rot, cam->transform);
-            
-            break;
-          }
-          case SDLK_d: {
-            Vec3 axis = transform_normal(cam->transform, { 0, 1, 0 });
-
-            double y_rot[3][4];
-            axis_angle_to_transform(y_rot, axis, -0.02f);
-
-            transform_mul(cam->transform, y_rot, cam->transform);
-            
-            break;
-          }
-          case SDLK_q: {
-            Vec3 axis = transform_normal(cam->transform, { 0, 1, 0 });
-
-            double y_rot[3][4];
-            axis_angle_to_transform(y_rot, axis, 0.02f);
-
-            transform_mul(cam->transform, y_rot, cam->transform);
-            
-            break;
-          }
-          case SDLK_e: {
-            Vec3 axis = transform_normal(cam->transform, { 0, 0, 1 });
-
-            double z_rot[3][4];
-            axis_angle_to_transform(z_rot, axis, -0.02f);
-
-            transform_mul(cam->transform, z_rot, cam->transform);
-            
-            break;
-          }
-          case SDLK_a: {
-            Vec3 axis = transform_normal(cam->transform, { 0, 0, 1 });
-
-            double z_rot[3][4];
-            axis_angle_to_transform(z_rot, axis, 0.02f);
-
-            transform_mul(cam->transform, z_rot, cam->transform);
-
-            break;
-          }
+          controls_KEYDOWN_case(SDLK_z, controls_KEYDOWN_case_vec1, 0.02f)
+          controls_KEYDOWN_case(SDLK_s, controls_KEYDOWN_case_vec1, -0.02f)
+          controls_KEYDOWN_case(SDLK_d, controls_KEYDOWN_case_vec2, -0.02f)
+          controls_KEYDOWN_case(SDLK_q, controls_KEYDOWN_case_vec2, 0.02f)
+          controls_KEYDOWN_case(SDLK_e, controls_KEYDOWN_case_vec3, -0.02f)
+          controls_KEYDOWN_case(SDLK_a, controls_KEYDOWN_case_vec3, 0.02f)
           default:
             break;
         }
@@ -115,8 +73,8 @@ void color_mesh(Mesh* mesh) {
 typedef struct {
   SDL_Window* window;
   SDL_Renderer* renderer;
-  int32_t window_width;
-  int32_t window_height;
+  int window_width;
+  int window_height;
 
   Camera* cam;
   Object* planet;
