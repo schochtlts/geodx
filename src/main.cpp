@@ -2,7 +2,7 @@
 #include <emscripten.h>
 #include <cstdint>
 
-#include "game/game.hpp"
+#include "game.hpp"
 
 void loop(void* args) {
   MainLoopArgs* a = (MainLoopArgs*)args;
@@ -37,7 +37,7 @@ int32_t main() {
 
   game_setup(&args);
 
-  emscripten_set_main_loop_arg(loop, (void*)&args, 60, 1); 
+  emscripten_set_main_loop_arg(loop, (void*)&args, 0, 1); 
   
   return 0;
 }

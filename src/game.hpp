@@ -4,9 +4,9 @@
 #include <SDL2/SDL.h>
 #include <cstdint>
 
-#include "../engine/linalg.hpp"
-#include "../engine/noise.hpp"
-#include "../engine/3d.hpp"
+#include "engine/linalg.hpp"
+#include "engine/noise.hpp"
+#include "engine/3d.hpp"
 
 void controls(Camera* cam) {
   SDL_Event event;
