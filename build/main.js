@@ -10074,6 +10074,7 @@ var ASM_CONSTS = {
 
 
 
+
   var listenOnce = (object, event, func) => {
       object.addEventListener(event, func, { 'once': true });
     };
@@ -10922,7 +10923,7 @@ var wasmImports = {
 };
 var wasmExports = createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors', 0);
-var _main = Module['_main'] = createExportWrapper('main', 2);
+var _main = Module['_main'] = createExportWrapper('__main_argc_argv', 2);
 var _malloc = createExportWrapper('malloc', 1);
 var _fflush = createExportWrapper('fflush', 1);
 var _emscripten_stack_init = () => (_emscripten_stack_init = wasmExports['emscripten_stack_init'])();
@@ -11235,14 +11236,22 @@ dependenciesFulfilled = function runCaller() {
   if (!calledRun) dependenciesFulfilled = runCaller; // try this again later, after new deps are fulfilled
 };
 
-function callMain() {
+function callMain(args = []) {
   assert(runDependencies == 0, 'cannot call main when async dependencies remain! (listen on Module["onRuntimeInitialized"])');
   assert(__ATPRERUN__.length == 0, 'cannot call main when preRun functions remain to be called');
 
   var entryFunction = _main;
 
-  var argc = 0;
-  var argv = 0;
+  args.unshift(thisProgram);
+
+  var argc = args.length;
+  var argv = stackAlloc((argc + 1) * 4);
+  var argv_ptr = argv;
+  args.forEach((arg) => {
+    HEAPU32[((argv_ptr)>>2)] = stringToUTF8OnStack(arg);
+    argv_ptr += 4;
+  });
+  HEAPU32[((argv_ptr)>>2)] = 0;
 
   try {
 
@@ -11266,7 +11275,7 @@ function stackCheckInit() {
   writeStackCookie();
 }
 
-function run() {
+function run(args = arguments_) {
 
   if (runDependencies > 0) {
     return;
@@ -11296,7 +11305,7 @@ function run() {
 
     if (Module['onRuntimeInitialized']) Module['onRuntimeInitialized']();
 
-    if (shouldRunNow) callMain();
+    if (shouldRunNow) callMain(args);
 
     postRun();
   }

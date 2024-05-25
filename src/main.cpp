@@ -4,7 +4,9 @@
 
 #include "game.hpp"
 
-void loop(void* args) {
+Game game;
+
+void geodx_main_loop(void* args) {
   MainLoopArgs* a = (MainLoopArgs*)args;
 
   a->window_width = EM_ASM_INT(return window.innerWidth);
@@ -12,11 +14,11 @@ void loop(void* args) {
   SDL_SetWindowSize(a->window, a->window_width, a->window_height);
 
   SDL_RenderClear(a->renderer);
-  game_update(a);
+  game.update(a);
   SDL_RenderPresent(a->renderer);
 }
 
-int main(int argc, char* args[]) {
+int main(int argc, char* argv[]) {
   SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS);
 
   SDL_Window* window=NULL;
@@ -25,8 +27,9 @@ int main(int argc, char* args[]) {
   int window_width=EM_ASM_INT(return window.innerWidth);
   int window_height=EM_ASM_INT(return window.innerHeight);
   
-  SDL_CreateWindowAndRenderer(window_width, window_height, 0, &window, &renderer);
+  SDL_CreateWindowAndRenderer(window_width, window_height, SDL_RENDERER_PRESENTVSYNC, &window, &renderer);
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
 
   MainLoopArgs args;
 
@@ -37,7 +40,7 @@ int main(int argc, char* args[]) {
 
   game_setup(&args);
 
-  emscripten_set_main_loop_arg(loop, (void*)&args, 0, 1); 
+  emscripten_set_main_loop_arg(geodx_main_loop, (void*)&args, 0, 1); 
   
   return 0;
 }
