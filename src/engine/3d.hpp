@@ -264,7 +264,7 @@ void draw_object(SDL_Renderer* renderer, Camera* cam, Object* obj, double win_wi
     const Vec3 p0 = transform_vec(to_cam_space, t.verts[0].pos);
     //if(p0.z < 0) continue;
 
-    if(p0.x*n.x + p0.y*n.y + p0.z*n.z > 0) continue;    
+    if(p0.x*n.x + p0.y*n.y + (p0.z + D)*n.z > 0) continue;    
 
     const Vec3 p1 = transform_vec(to_cam_space, t.verts[1].pos);
     //if(p1.z < 0) continue;

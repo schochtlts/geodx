@@ -3,7 +3,7 @@ import socketserver
 import os
 
 # Set the directory where your files are located
-DIRECTORY = "."
+DIRECTORY = "../build/"
 
 # Set the port number
 PORT = 8000
