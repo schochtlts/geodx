@@ -22,21 +22,13 @@ private:
   int _window_height;
   int _window_width;
 
-  static Object _planet;
-  static Camera _cam;
+  Object _planet;
+  Camera _cam;
 
 public:
-  Game();
-  ~Game();
   void setup();
-  em_callback_func update();
+  void update();
 };
-
-Game::Game(){
-}
-
-Game::~Game(){
-}
 
 void Game::controls() {
   SDL_Event event;
@@ -95,6 +87,12 @@ void Game::color_mesh(Mesh* mesh) {
   }
 }
 
+// somehow works
+extern Game game;
+void __update__(){
+  game.update();
+}
+
 void Game::setup(){
 
 // SDL related initialisations
@@ -115,10 +113,10 @@ void Game::setup(){
   _cam.transform[2][3] = -2000;
 
 // emscripten related
-  emscripten_set_main_loop(update(), 0, 1);
+  emscripten_set_main_loop(__update__, 0, 1);
 }
 
-em_callback_func Game::update() {
+void Game::update() {
   _window_width = EM_ASM_INT(return window.innerWidth);
   _window_height = EM_ASM_INT(return window.innerHeight);
   SDL_SetWindowSize(_window, _window_width, _window_height);

@@ -1,5 +1,5 @@
-#ifndef _3D_H_
-#define _3D_H_
+
+#pragma once
 
 #include <SDL2/SDL.h>
 #include <cstdint>
@@ -302,5 +302,3 @@ void axis_angle_to_transform(double rot_mat[3][4], Vec3 axis, double angle) {
 
   memcpy(rot_mat, R, 12*sizeof(double));
 }
-
-#endif

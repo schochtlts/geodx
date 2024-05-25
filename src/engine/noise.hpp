@@ -1,5 +1,5 @@
-#ifndef _NOISE_H_
-#define _NOISE_H_
+
+#pragma once
 
 #include <cstdint>
 #include <cmath>
@@ -107,5 +107,3 @@ double simplex_noise(Vec3 pos, uint32_t seed) {
 
   return fade(hash0*a + hash1*b + hash2*c + hash3*d);
 }
-
-#endif
