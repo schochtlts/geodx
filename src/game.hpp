@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <emscripten.h>
@@ -9,9 +8,7 @@
 #include "engine/noise.hpp"
 #include "engine/3d.hpp"
 
-//typedef void (*em_arg_callback_func)(void*);
-
-class Game{
+class Game {
 private:
   void controls();
   SDL_Color color(Vec3 pos);
@@ -30,44 +27,37 @@ public:
   void update();
 };
 
+void rotate_cam(Camera* cam, Vec3 vec, double angle) {
+  const Vec3 axis = transform_normal(cam->transform, vec);
+  const Mat3x4 rot = axis_angle_to_mat(axis, angle);
+  cam->transform = rot*(cam->transform);
+}
+
 void Game::controls() {
   SDL_Event event;
 
-  while(SDL_PollEvent(&event)){
-    switch(event.type){
+  while(SDL_PollEvent(&event)) {
+    switch(event.type) {
       case SDL_KEYDOWN:
         switch(event.key.keysym.sym) {
-
-#define controls_KEYDOWN_case_vec1 {1,0,0}
-#define controls_KEYDOWN_case_vec2 {0,1,0}
-#define controls_KEYDOWN_case_vec3 {0,0,1}
-
-#define controls_KEYDOWN_case(key, vec, angle) case key:{Vec3 axis##key = transform_normal(_cam.transform, vec);double rot##key [3][4];axis_angle_to_transform(rot##key , axis##key , angle);transform_mul(_cam.transform, rot##key, _cam.transform);break;}
-
-          controls_KEYDOWN_case(SDLK_z, controls_KEYDOWN_case_vec1, 0.02f)
-          controls_KEYDOWN_case(SDLK_s, controls_KEYDOWN_case_vec1, -0.02f)
-          controls_KEYDOWN_case(SDLK_d, controls_KEYDOWN_case_vec2, -0.02f)
-          controls_KEYDOWN_case(SDLK_q, controls_KEYDOWN_case_vec2, 0.02f)
-          controls_KEYDOWN_case(SDLK_e, controls_KEYDOWN_case_vec3, -0.02f)
-          controls_KEYDOWN_case(SDLK_a, controls_KEYDOWN_case_vec3, 0.02f)
-          //default:
-          //  break;
+          case SDLK_s: { rotate_cam(&_cam, Vec3( 1, 0, 0 ), -0.02f); break; }
+          case SDLK_z: { rotate_cam(&_cam, Vec3( 1, 0, 0 ), 0.02f);  break; }
+          case SDLK_d: { rotate_cam(&_cam, Vec3( 0, 1, 0 ), -0.02f); break; }
+          case SDLK_q: { rotate_cam(&_cam, Vec3( 0, 1, 0 ), 0.02f);  break; }
+          case SDLK_e: { rotate_cam(&_cam, Vec3( 0, 0, 1 ), -0.02f); break; }
+          case SDLK_a: { rotate_cam(&_cam, Vec3( 0, 0, 1 ), 0.02f);  break; }
         }
         break;
-      //default:
-      //  break;
     }
   }
 }
 
 SDL_Color Game::color(Vec3 pos) {
-  double noise =  simplex_noise(mul(0.01f, pos), 0);
-  noise +=   0.5f*simplex_noise(mul(0.02f, pos), 0);
-  noise +=  0.25f*simplex_noise(mul(0.04f, pos), 0);
-  noise += 0.125f*simplex_noise(mul(0.08f, pos), 0);
+  double noise =  simplex_noise(0.01f*pos, 0);
+  noise +=   0.5f*simplex_noise(0.02f*pos, 0);
+  noise +=  0.25f*simplex_noise(0.04f*pos, 0);
+  noise += 0.125f*simplex_noise(0.08f*pos, 0);
   noise /= 1.0f + 0.5f + 0.25f + 0.125f;
-
-  SDL_Color color;
 
   if(noise > 0.5f) {
     return (SDL_Color){ 0, 128, 0, 255 };
@@ -89,11 +79,11 @@ void Game::color_mesh(Mesh* mesh) {
 
 // somehow works
 extern Game game;
-void __update__(){
+void __update__() {
   game.update();
 }
 
-void Game::setup(){
+void Game::setup() {
 
 // SDL related initialisations
   SDL_Init(SDL_INIT_EVERYTHING);
@@ -108,9 +98,9 @@ void Game::setup(){
   static Mesh ico = generate_icosphere(500, 4);
   compute_normals(&ico);
   color_mesh(&ico);
-  _planet = { IDENT_TRANSFORM, &ico };
-  _cam = { IDENT_TRANSFORM, 0.87f };
-  _cam.transform[2][3] = -2000;
+  _planet = { IDENT_MAT3x4, &ico };
+  _cam = { IDENT_MAT3x4, 0.87f };
+  _cam.transform(3,2) = -2000;
 
 // emscripten related
   emscripten_set_main_loop(__update__, 0, 1);

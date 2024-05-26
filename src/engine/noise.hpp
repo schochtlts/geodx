@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <cstdint>
@@ -41,7 +40,7 @@ double simplex_noise(Vec3 pos, uint32_t seed) {
                               (loc_pos.y > loc_pos.x);
 
   const double hash0 = hash(grid_pos, seed);
-  const double hash3 = hash(add(grid_pos, { 1.0f, 1.0f, 1.0f }), seed);
+  const double hash3 = hash(grid_pos + Vec3( 1.0f, 1.0f, 1.0f ), seed);
   double hash1, hash2;
 
   // baryocentric coordinates
@@ -50,8 +49,8 @@ double simplex_noise(Vec3 pos, uint32_t seed) {
   // case 2 and 5 make no geometrical sense
   switch(tetra_index) {
     case 0: {
-      hash1 = hash(add(grid_pos, { 1.0f, 0.0f, 0.0f }), seed);
-      hash2 = hash(add(grid_pos, { 1.0f, 1.0f, 0.0f }), seed);
+      hash1 = hash(grid_pos + Vec3( 1.0f, 0.0f, 0.0f ), seed);
+      hash2 = hash(grid_pos + Vec3( 1.0f, 1.0f, 0.0f ), seed);
 
       a = 1.0f - loc_pos.x;
       b = loc_pos.x - loc_pos.y;
@@ -59,8 +58,8 @@ double simplex_noise(Vec3 pos, uint32_t seed) {
       d = loc_pos.z;
     }
     case 1: {
-      hash1 = hash(add(grid_pos, { 0.0f, 1.0f, 0.0f }), seed);
-      hash2 = hash(add(grid_pos, { 1.0f, 1.0f, 0.0f }), seed);
+      hash1 = hash(grid_pos + Vec3( 0.0f, 1.0f, 0.0f ), seed);
+      hash2 = hash(grid_pos + Vec3( 1.0f, 1.0f, 0.0f ), seed);
 
       a = 1.0f - loc_pos.y;
       b = loc_pos.y - loc_pos.x;
@@ -68,8 +67,8 @@ double simplex_noise(Vec3 pos, uint32_t seed) {
       d = loc_pos.z;
     }
     case 3: {
-      hash1 = hash(add(grid_pos, { 0.0f, 1.0f, 0.0f }), seed);
-      hash2 = hash(add(grid_pos, { 0.0f, 1.0f, 1.0f }), seed);
+      hash1 = hash(grid_pos + Vec3( 0.0f, 1.0f, 0.0f ), seed);
+      hash2 = hash(grid_pos + Vec3( 0.0f, 1.0f, 1.0f ), seed);
 
       a = 1.0f - loc_pos.y;
       b = loc_pos.y - loc_pos.z;
@@ -77,8 +76,8 @@ double simplex_noise(Vec3 pos, uint32_t seed) {
       d = loc_pos.x;
     }
     case 4: {
-      hash1 = hash(add(grid_pos, { 1.0f, 0.0f, 0.0f }), seed);
-      hash2 = hash(add(grid_pos, { 1.0f, 0.0f, 1.0f }), seed);
+      hash1 = hash(grid_pos + Vec3( 1.0f, 0.0f, 0.0f ), seed);
+      hash2 = hash(grid_pos + Vec3( 1.0f, 0.0f, 1.0f ), seed);
 
       a = 1.0f - loc_pos.x;
       b = loc_pos.x - loc_pos.z;
@@ -86,8 +85,8 @@ double simplex_noise(Vec3 pos, uint32_t seed) {
       d = loc_pos.y;
     }
     case 6: {
-      hash1 = hash(add(grid_pos, { 0.0f, 0.0f, 1.0f }), seed);
-      hash2 = hash(add(grid_pos, { 1.0f, 0.0f, 1.0f }), seed);
+      hash1 = hash(grid_pos + Vec3( 0.0f, 0.0f, 1.0f ), seed);
+      hash2 = hash(grid_pos + Vec3( 1.0f, 0.0f, 1.0f ), seed);
 
       a = 1.0f - loc_pos.z;
       b = loc_pos.z - loc_pos.x;
@@ -95,8 +94,8 @@ double simplex_noise(Vec3 pos, uint32_t seed) {
       d = loc_pos.y;
     }
     case 7: {
-      hash1 = hash(add(grid_pos, { 0.0f, 0.0f, 1.0f }), seed);
-      hash2 = hash(add(grid_pos, { 0.0f, 1.0f, 1.0f }), seed);
+      hash1 = hash(grid_pos + Vec3( 0.0f, 0.0f, 1.0f ), seed);
+      hash2 = hash(grid_pos + Vec3( 0.0f, 1.0f, 1.0f ), seed);
 
       a = 1.0f - loc_pos.z;
       b = loc_pos.z - loc_pos.y;

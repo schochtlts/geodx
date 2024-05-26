@@ -21,23 +21,23 @@ public:
 
   ~Vec3() {}
 
-  double norm();
-  Vec3 normalized();
-  Vec3 rotated_x(double);
-  Vec3 rotated_y(double);
-  Vec3 rotated_z(double);
+  double norm() const;
+  Vec3 normalized() const ;
+  Vec3 rotated_x(double) const;
+  Vec3 rotated_y(double) const;
+  Vec3 rotated_z(double) const;
 };
 
-double Vec3::norm() {
+double Vec3::norm() const {
   return std::sqrt(x*x + y*y + z*z);
 }
 
-Vec3 Vec3::normalized() {
+Vec3 Vec3::normalized() const {
   const double n = norm();
   return Vec3(x/n, y/n, z/n);
 }
 
-Vec3 Vec3::rotated_x(double angle) {
+Vec3 Vec3::rotated_x(double angle) const {
   const double cos = std::cos(angle), sin = std::sin(angle);
   Vec3 C;
   C.x = x;
@@ -46,7 +46,7 @@ Vec3 Vec3::rotated_x(double angle) {
   return C;
 }
 
-Vec3 Vec3::rotated_y(double angle) {
+Vec3 Vec3::rotated_y(double angle) const {
   const double cos = std::cos(angle), sin = std::sin(angle);
   Vec3 C;
   C.x = cos*x + sin*z;
@@ -55,7 +55,7 @@ Vec3 Vec3::rotated_y(double angle) {
   return C;
 }
 
-Vec3 Vec3::rotated_z(double angle) {
+Vec3 Vec3::rotated_z(double angle) const {
   const double cos = std::cos(angle), sin = std::sin(angle);
   Vec3 C;
   C.x = cos*x - sin*y;
@@ -66,6 +66,10 @@ Vec3 Vec3::rotated_z(double angle) {
 
 Vec3 operator+(Vec3 A, Vec3 B) {
   return Vec3(A.x + B.x, A.y + B.y, A.z + B.z);
+}
+
+Vec3 operator-(Vec3 A, Vec3 B) {
+  return Vec3(A.x - B.x, A.y - B.y, A.z - B.z);
 }
 
 Vec3 operator*(double s, Vec3 v) {
@@ -109,8 +113,11 @@ public:
 
   ~Mat3x4() {}
 
+  double operator()(size_t x, size_t y) const { return mat[y][x]; };
   double& operator()(size_t x, size_t y) { return mat[y][x]; };
 };
+
+#define IDENT_MAT3x4 Mat3x4({ { 1., 0., 0., 0. }, { 0., 1., 0., 0. }, { 0., 0., 1., 0. } })
 
 Mat3x4 operator+(Mat3x4 A, Mat3x4 B) {
   return Mat3x4({ { A(0,0) + B(0,0), A(1,0) + B(1,0), A(2,0) + B(2,0), A(3,0) + B(3,0) },
@@ -143,4 +150,13 @@ Mat3x4 operator*(Mat3x4 m1, Mat3x4 m2) {
   res(3,2) = m1(0,2)*m2(3,0) + m1(1,2)*m2(3,1) + m1(2,2)*m2(3,2) + m1(3,2);
 
   return res;
+}
+
+Mat3x4 axis_angle_to_mat(Vec3 axis, double angle) {
+  const double cos = std::cos(angle), sin = std::sin(angle);
+  const Mat3x4 K = Mat3x4({ { 0.0f, -axis.z, axis.y, 0.0f },
+                            { axis.z, 0.0f, -axis.x, 0.0f },
+                            { -axis.y, axis.x, 0.0f, 0.0f } });
+
+  return IDENT_MAT3x4 + sin*K + (1.0f - cos)*(K*K);
 }
