@@ -43,23 +43,19 @@ Mesh generate_icosphere(double radius, uint8_t sub_level) {
   const double SHORT = SIDE_LEN / 2.0f;
   const double LONG = SIDE_LEN * GOLDEN_RATIO / 2.0f;
 
-  const Vertex verts[3][4];
-  verts[0][0].pos.setPosFromArray({0,SHORT, -LONG});
-  verts[0][0].pos.color=0;
-  verts[0][0].pos.setPosFromArray({0,SHORT, -LONG});
-  verts[0][0].pos.color=0;
-    { { { 0, SHORT, -LONG  }, { 0 } },
-      { { 0, SHORT, LONG   }, { 0 } },
-      { { 0, -SHORT, -LONG }, { 0 } },
-      { { 0, -SHORT, LONG  }, { 0 } } },
-    { { { LONG, 0, -SHORT  }, { 0 } },
-      { { LONG, 0, SHORT   }, { 0 } },
-      { { -LONG, 0, -SHORT }, { 0 } },
-      { { -LONG, 0, SHORT  }, { 0 } } },
-    { { { SHORT, -LONG, 0  }, { 0 } },
-      { { SHORT, LONG, 0   }, { 0 } },
-      { { -SHORT, -LONG, 0 }, { 0 } },
-      { { -SHORT, LONG, 0  }, { 0 } } }
+  const Vertex verts[3][4] = {
+    { { Vec3( 0, SHORT, -LONG  ), { 0 } },
+      { Vec3( 0, SHORT, LONG   ), { 0 } },
+      { Vec3( 0, -SHORT, -LONG ), { 0 } },
+      { Vec3( 0, -SHORT, LONG  ), { 0 } } },
+    { { Vec3( LONG, 0, -SHORT  ), { 0 } },
+      { Vec3( LONG, 0, SHORT   ), { 0 } },
+      { Vec3( -LONG, 0, -SHORT ), { 0 } },
+      { Vec3( -LONG, 0, SHORT  ), { 0 } } },
+    { { Vec3( SHORT, -LONG, 0  ), { 0 } },
+      { Vec3( SHORT, LONG, 0   ), { 0 } },
+      { Vec3( -SHORT, -LONG, 0 ), { 0 } },
+      { Vec3( -SHORT, LONG, 0  ), { 0 } } }
   };
 
   auto triangles = std::vector{
