@@ -10,7 +10,7 @@
             "preLaunchTask": "EMSCRIPTEN_BUILD",
             "request": "launch",
             "reAttach": true,
-            "file": "${workspaceFolder}\\build\\index.html"
+            "file": "${workspaceFolder}\\index.html"
         },
     ]
 }

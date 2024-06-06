@@ -6,7 +6,7 @@
         {
             "label": "EMSCRIPTEN_BUILD",
             "type": "shell",
-            "command": "emsdk activate; emcc src/main.cpp -o build/main.js -s NO_EXIT_RUNTIME=1 -s EXPORTED_RUNTIME_METHODS=[ccall] -s USE_SDL=2 -s MAX_WEBGL_VERSION=2",
+            "command": "emsdk activate; emcc src/main.cpp -o main.js -s NO_EXIT_RUNTIME=1 -s EXPORTED_RUNTIME_METHODS=[ccall] -s USE_SDL=2 -s MAX_WEBGL_VERSION=2",
         }
     ]
 }

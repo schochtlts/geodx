@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <emscripten.h>
@@ -13,6 +14,7 @@ private:
   void controls();
   SDL_Color color(Vec3 pos);
   void color_mesh(Mesh* mesh);
+  void rotate_cam(Camera* cam, Vec3 vec, double angle);
 
   SDL_Window* _window;
   SDL_Renderer* _renderer;
@@ -22,14 +24,21 @@ private:
   Object _planet;
   Camera _cam;
 
+  double _camera_speed=1.0f;
+  clock_t _last_movement_time=0.0f;
+
 public:
   void setup();
   void update();
 };
 
-void rotate_cam(Camera* cam, Vec3 vec, double angle) {
+void Game::rotate_cam(Camera* cam, Vec3 vec, double angle) {
   const Vec3 axis = transform_normal(cam->transform, vec);
-  const Mat3x4 rot = axis_angle_to_mat(axis, angle);
+  const clock_t currentTime=clock();
+  std::cout<<currentTime<<std::endl;
+  _camera_speed+=0.02f;
+  _last_movement_time=currentTime;
+  const Mat3x4 rot = axis_angle_to_mat(axis, angle*_camera_speed);
   cam->transform = rot*(cam->transform);
 }
 
