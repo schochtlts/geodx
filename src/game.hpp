@@ -4,12 +4,13 @@
 #include <SDL2/SDL.h>
 #include <cstdint>
 #include <cmath>
+#include <algorithm>
 
 #include "engine/linalg.hpp"
 #include "engine/noise.hpp"
 #include "engine/3d.hpp"
 
-typedef enum { IDLE, XY_ROT, NEUTRAL, Z_ROT } InputState; 
+typedef enum { IDLE, XY_ROT } InputState; 
 
 class Game {
 private:
@@ -38,9 +39,24 @@ public:
 };
 
 #define MOUSE_SENSIBILITY 0.005f
-#define NEUTRAL_RADIUS 20.0f
+#define MOUSEWHEEL_SENSIBILITY 0.01f
 
 void Game::input_state_transition(SDL_Event event) {
+  if(event.type == SDL_MOUSEWHEEL) {
+    // c moche mais hey
+    //
+    // ca garantie qu'il ait une relation lineaire
+    // entre la quantite de scroll et la taille
+    // apparente ajoutee a la planete
+    const double dr = -MOUSEWHEEL_SENSIBILITY*event.wheel.preciseY;
+    const double z = -_cam.transform(3,2);
+    const double D = 0.5f / std::tan(_cam.fov / 2);
+    const double dz = ( dr*(z + D)*(z + D) ) / ( 500*D + dr*(z + D) );
+    
+    _cam.transform(3,2) -= dz;
+    if( _cam.transform(3,2) > -500 ) _cam.transform(3,2) = -500;
+    if( _cam.transform(3,2) < -10000 ) _cam.transform(3,2) = -10000;
+  }
   switch(_state) {
     case IDLE: {
       if(event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
@@ -71,7 +87,7 @@ void Game::input_state_action() {
       const Vec3 v3 = Vec3( mouse_x - _mouse_anchor.x, _mouse_anchor.y - mouse_y );
 
       const double sign = dot(v1, v3) > 0 ? -1 : 1;
-      const double angle1 = sign * std::acos( dot(v2, v3.normalized()) );
+      const double angle1 = sign*std::acos( dot(v2, v3.normalized()) );
 
       const Vec3 axis = transform_normal(axis_angle_to_mat(v1.normalized(), angle1), Vec3( 0, 0, -1 ));
       const double angle2 = MOUSE_SENSIBILITY*v3.norm();
@@ -128,7 +144,7 @@ void __update__() {
 
 void Game::setup() {
 
-// SDL related initialisations
+  // SDL related initialisations
   SDL_Init(SDL_INIT_EVERYTHING);
 
   _window_width = EM_ASM_INT(return window.innerWidth);
@@ -139,7 +155,7 @@ void Game::setup() {
   // disable right click menu
   EM_ASM(document.addEventListener('contextmenu',e=>e.preventDefault()));
 
-// game related
+  // game related
   static Mesh ico = generate_icosphere(500, 4);
   compute_normals(&ico);
   color_mesh(&ico);
@@ -147,7 +163,7 @@ void Game::setup() {
   _cam = { IDENT_MAT3x4, 0.87f };
   _cam.transform(3,2) = -2000;
 
-// emscripten related
+  // emscripten related
   emscripten_set_main_loop(__update__, 0, 1);
 }
 

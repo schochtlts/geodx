@@ -174,7 +174,7 @@ Vec3 transform_normal(Mat3x4 m, Vec3 n) {
 void draw_object(SDL_Renderer* renderer, Camera* cam, Object* obj, double win_width, double win_height) {
   const double HF_W = win_width / 2.0f;
   const double HF_H = win_height / 2.0f;
-  const double D = HF_W / std::tan(cam->fov / 2.0f);
+  const double D = 0.5f / std::tan(cam->fov / 2.0f);
 
   const Mat3x4 m = cam->transform;
   const Mat3x4 view_mat = Mat3x4({
@@ -189,18 +189,18 @@ void draw_object(SDL_Renderer* renderer, Camera* cam, Object* obj, double win_wi
     
     const Vec3 n = transform_normal(to_cam_space, t.normal);
     const Vec3 p0 = transform_vec(to_cam_space, t.verts[0].pos);
-    //if(p0.z < 0) continue;
+    if(p0.z < 0) continue;
 
     if(dot(p0 + Vec3( 0, 0, D ), n) > 0) continue;
 
     const Vec3 p1 = transform_vec(to_cam_space, t.verts[1].pos);
-    //if(p1.z < 0) continue;
+    if(p1.z < 0) continue;
     const Vec3 p2 = transform_vec(to_cam_space, t.verts[2].pos);
-    //if(p2.z < 0) continue;
+    if(p2.z < 0) continue;
 
-    const double Z0 = D / (D + p0.z);
-    const double Z1 = D / (D + p1.z);
-    const double Z2 = D / (D + p2.z);
+    const double Z0 = win_width*D / (D + p0.z);
+    const double Z1 = win_width*D / (D + p1.z);
+    const double Z2 = win_width*D / (D + p2.z);
 
     const SDL_Vertex verts_2d[3] = {
       { (SDL_FPoint){ (float)(HF_W + Z0*p0.x), (float)(HF_H - Z0*p0.y) }, t.verts[0].color, (SDL_FPoint){ 0 } },
