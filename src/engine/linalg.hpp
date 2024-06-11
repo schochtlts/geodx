@@ -34,6 +34,7 @@ double Vec3::norm() const {
 
 Vec3 Vec3::normalized() const {
   const double n = norm();
+  if( n == 0 ) return Vec3(0, 0, 0);
   return Vec3(x/n, y/n, z/n);
 }
 
