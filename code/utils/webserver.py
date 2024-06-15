@@ -3,7 +3,7 @@ import socketserver
 import os
 
 # Set the directory where your files are located
-DIRECTORY = "../build/"
+DIRECTORY = "../../"
 
 # Set the port number
 PORT = 8000
@@ -20,6 +20,8 @@ class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif self.path.endswith(".wasm"):
             self.send_response(200)
             self.send_header("Content-type", "application/wasm")
+        elif self.path.endswith(".data"):
+            self.send_response(200)
         else:
             # Serve other file types as well
             super().do_GET()
