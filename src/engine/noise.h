@@ -4,7 +4,7 @@
 #include <cmath>
 #include <limits>
 
-#include "linalg.hpp"
+#include "linalg.h"
 
 // Thanks Thomas Wang for this beautiful function, it works very well
 // https://burtleburtle.net/bob/hash/integer.html

@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <emscripten.h>
@@ -6,9 +7,65 @@
 #include <cmath>
 #include <algorithm>
 
-#include "engine/linalg.hpp"
-#include "engine/noise.hpp"
-#include "engine/3d.hpp"
+#include "engine/linalg.h"
+#include "engine/noise.h"
+#include "engine/3d.h"
+
+/*
+ * networking/multiplayer
+ */
+
+class Network
+{
+private:
+  int _role;// 1 for host and 0 for invitee
+public:
+  void select_role();
+  void establish_connection();
+  void send(const char *message);
+};
+
+void Network::send(const char *message){
+  EM_ASM({network_connection.data_chan.send("cc")});
+}
+
+void Network::select_role(){
+  _role=EM_ASM_INT(return confirm("Are you the HOST?"););
+}
+
+void Network::establish_connection(){
+  if(_role){
+    EM_ASM(
+      	network_connection.data_chan = network_connection.createDataChannel("dc");
+	      network_connection.data_chan.onopen = () => console.log("--- Connection initialised as HOST ---");
+	      network_connection.data_chan.onclose = () => alert("--- /!\\ Connection interrupted /!\\ ---");
+	      network_connection.data_chan.onmessage = e => {
+		      console.log("New msg: " + e.data);
+	      };
+	      const offer = network_connection.createOffer();
+	      network_connection.setLocalDescription(offer);
+
+	      network_host_await_answer();
+    );
+  }else{
+    EM_ASM(
+    	network_connection.ondatachannel = e => {
+		    network_connection.data_chan = e.channel;
+		    network_connection.data_chan.onopen = () => console.log("--- Connection opened as INVITEE---");
+		    network_connection.data_chan.onclose = () => alert("--- /!\\ Connection interrupted /!\\ ---");
+		    network_connection.data_chan.onmessage = e => {
+			    console.log("New msg: " + e.data);
+        };
+		  };
+	    network_connection.setRemoteDescription(JSON.parse(prompt("Peer's SDP offer:")));
+	    network_connection.setLocalDescription(network_connection.createAnswer());
+    );
+	}
+}
+
+/*
+ * main game stuff
+ */
 
 typedef enum { IDLE, XY_ROT } InputState; 
 
@@ -143,6 +200,8 @@ void __update__() {
 }
 
 void Game::setup() {
+
+  // network/multiplayer related
 
   // SDL related initialisations
   SDL_Init(SDL_INIT_EVERYTHING);

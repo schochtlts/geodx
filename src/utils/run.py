@@ -1,11 +1,10 @@
+
 import http.server
 import socketserver
 import os
 
-# Set the directory where your files are located
-DIRECTORY = "../build/"
+DIRECTORY = "../../"
 
-# Set the port number
 PORT = 8000
 
 class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -24,7 +23,6 @@ class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
             # Serve other file types as well
             super().do_GET()
             return
-
         try:
             # Open the requested file and send its content
             with open(os.path.join(DIRECTORY, self.path[1:]), "rb") as file:
@@ -35,6 +33,7 @@ class MyHttpRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 # Set up the HTTP server
 with socketserver.TCPServer(("", PORT), MyHttpRequestHandler) as httpd:
-    print("Server running on port", PORT)
+    print("Server running on port ", PORT)
     # Start the server
     httpd.serve_forever()
+

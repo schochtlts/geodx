@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <SDL2/SDL.h>
@@ -5,7 +6,7 @@
 #include <cmath>
 #include <vector>
 
-#include "linalg.hpp"
+#include "linalg.h"
 
 typedef struct {
   Vec3 pos;
