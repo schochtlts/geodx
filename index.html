@@ -11,11 +11,12 @@ var Module = {
 	canvas: document.getElementById('canvas')
 };
 
+let packet_queue = [];
 const network_connection = new RTCPeerConnection({"iceServers": [{"urls": "stun:stun.l.google.com:19302"}]});
 network_connection.onicecandidate = () => console.log(JSON.stringify(network_connection.localDescription));
 
 async function network_host_await_answer(){
-    await new Promise(r => setTimeout(r, 1000));
+	await new Promise(r => setTimeout(r, 1000));
 	network_connection.setRemoteDescription(JSON.parse(prompt("Peer's SDP answer:")));
 };
         </script>

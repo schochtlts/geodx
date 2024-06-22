@@ -6,62 +6,12 @@
 #include <cstdint>
 #include <cmath>
 #include <algorithm>
+#include <sstream>
+#include <string>
 
 #include "engine/linalg.h"
 #include "engine/noise.h"
 #include "engine/3d.h"
-
-/*
- * networking/multiplayer
- */
-
-class Network
-{
-private:
-  int _role;// 1 for host and 0 for invitee
-public:
-  void select_role();
-  void establish_connection();
-  void send(const char *message);
-};
-
-void Network::send(const char *message){
-  EM_ASM({network_connection.data_chan.send("cc")});
-}
-
-void Network::select_role(){
-  _role=EM_ASM_INT(return confirm("Are you the HOST?"););
-}
-
-void Network::establish_connection(){
-  if(_role){
-    EM_ASM(
-      	network_connection.data_chan = network_connection.createDataChannel("dc");
-	      network_connection.data_chan.onopen = () => console.log("--- Connection initialised as HOST ---");
-	      network_connection.data_chan.onclose = () => alert("--- /!\\ Connection interrupted /!\\ ---");
-	      network_connection.data_chan.onmessage = e => {
-		      console.log("New msg: " + e.data);
-	      };
-	      const offer = network_connection.createOffer();
-	      network_connection.setLocalDescription(offer);
-
-	      network_host_await_answer();
-    );
-  }else{
-    EM_ASM(
-    	network_connection.ondatachannel = e => {
-		    network_connection.data_chan = e.channel;
-		    network_connection.data_chan.onopen = () => console.log("--- Connection opened as INVITEE---");
-		    network_connection.data_chan.onclose = () => alert("--- /!\\ Connection interrupted /!\\ ---");
-		    network_connection.data_chan.onmessage = e => {
-			    console.log("New msg: " + e.data);
-        };
-		  };
-	    network_connection.setRemoteDescription(JSON.parse(prompt("Peer's SDP offer:")));
-	    network_connection.setLocalDescription(network_connection.createAnswer());
-    );
-	}
-}
 
 /*
  * main game stuff
@@ -83,7 +33,6 @@ private:
   int _window_height;
   int _window_width;
 
-  Object _planet;
   Camera _cam;
 
   InputState _state = IDLE;
@@ -91,6 +40,8 @@ private:
   Mat3x4 _planet_anchor;
 
 public:
+  Object _planet;
+
   void setup();
   void update();
 };
@@ -226,6 +177,18 @@ void Game::setup() {
   emscripten_set_main_loop(__update__, 0, 1);
 }
 
+class Network
+{
+private:
+  int _role;// 1 for host and 0 for invitee
+public:
+  void select_role();
+  void establish_connection();
+  void update();
+};
+
+extern Network network;
+
 void Game::update() {
   _window_width = EM_ASM_INT(return window.innerWidth);
   _window_height = EM_ASM_INT(return window.innerHeight);
@@ -234,5 +197,77 @@ void Game::update() {
   SDL_RenderClear(_renderer);
   draw_object(_renderer, &_cam, &_planet, _window_width, _window_height);
   controls();
+  network.update();
   SDL_RenderPresent(_renderer);
+}
+
+/*
+ * networking/multiplayer
+ */
+
+void Network::update() {
+  if(_role) {
+    double* mat = (double*)(game._planet.transform.mat);
+    std::ostringstream oss;
+    for(size_t i = 0; i < 12; i++) {
+        oss << mat[i] << ' ';
+    }
+    const char* msg = oss.str().c_str();
+    EM_ASM({
+      if( network_connection.data_chan.readyState === "open" ) {
+        network_connection.data_chan.send(UTF8ToString($0));
+      }
+    }, msg);
+  }
+  else {
+    char* msg = (char*)EM_ASM_PTR(
+      let msg = packet_queue.shift();
+      if( msg === undefined ) msg = "";
+      return stringToNewUTF8(msg);
+    );
+    if( msg[0] == '\0' ) {
+      free(msg);
+      return;
+    }
+    
+    double mat[12];
+    std::istringstream iss(msg);
+    std::string token;
+    for(size_t i = 0; i < 12; i++) {
+      std::getline(iss, token, ' ');
+      mat[i] = std::stod(token);
+    }
+    free(msg);
+
+    memcpy(game._planet.transform.mat, mat, 12*sizeof(double));
+  }
+}
+
+void Network::select_role(){
+  _role=EM_ASM_INT(return confirm("Are you the HOST?"););
+}
+
+void Network::establish_connection(){
+  if(_role){
+    EM_ASM(
+      	network_connection.data_chan = network_connection.createDataChannel("dc");
+	      network_connection.data_chan.onopen = () => console.log("--- Connection initialised as HOST ---");
+	      network_connection.data_chan.onclose = () => alert("--- /!\\ Connection interrupted /!\\ ---");
+	      network_connection.data_chan.onmessage = e => packet_queue.push(e.data);
+	      network_connection.setLocalDescription(network_connection.createOffer());
+
+	      network_host_await_answer();
+    );
+  }else{
+    EM_ASM(
+    	network_connection.ondatachannel = e => {
+		    network_connection.data_chan = e.channel;
+		    network_connection.data_chan.onopen = () => console.log("--- Connection opened as INVITEE---");
+		    network_connection.data_chan.onclose = () => alert("--- /!\\ Connection interrupted /!\\ ---");
+		    network_connection.data_chan.onmessage = e => packet_queue.push(e.data);
+		  };
+	    network_connection.setRemoteDescription(JSON.parse(prompt("Peer's SDP offer:")));
+	    network_connection.setLocalDescription(network_connection.createAnswer());
+    );
+	}
 }
